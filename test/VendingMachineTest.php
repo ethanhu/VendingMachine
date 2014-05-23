@@ -58,4 +58,19 @@ class VendingMachineTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1600, $this->model->refund(), '100円と500円と1000円を一緒に払い戻しできる');
     }
 
+    public function test_想定外なお金を投入した後自動払い戻し()
+    {
+        $money_1 = 1;
+        $this->model->insert($money_1);
+        $this->assertEquals(0, $this->model->total(),  '想定外な投入お金を総計しない');
+
+        $money_5 = 5;
+        $this->model->insert($money_5);
+        $this->assertEquals(0, $this->model->total(),  '想定外な投入お金を総計しない');
+
+        $money_10000 = 10000;
+        $this->model->insert($money_10000);
+        $this->assertEquals(0, $this->model->total(),  '想定外な投入お金を総計しない');
+    }
+ 
 }
