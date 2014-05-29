@@ -2,6 +2,7 @@
 
 require_once dirname(__FILE__) . '/../lib/VendingMachine.php';
 require_once dirname(__FILE__) . '/../lib/Money.php';
+require_once dirname(__FILE__) . '/../lib/Coke.php';
 
 class VendingMachineTest extends PHPUnit_Framework_TestCase
 {
@@ -82,6 +83,22 @@ class VendingMachineTest extends PHPUnit_Framework_TestCase
         $result = $this->model->insert($money_10000);
         $this->assertFalse($result,  '想定外な10000円を投入できない');
         $this->assertEquals(0, $this->model->total(),  '想定外な投入お金を総計しない');
+    }
+
+    public function test_商品の格納できると格納されているジュースの情報を取得できる()
+    {
+        $name = 'Coke';
+        $price = 120;
+        $stockNum = 5;
+        $coke = new Coke($name, $price);
+        $coke->store($stockNum);
+        $this->model->addItem($coke);
+        $storeCoke = $this->model->getItem($name);
+
+        $this->assertEquals($coke, $storeCoke, '商品の格納できる');
+        $this->assertTrue($storeCoke->inStock(), '商品の在庫情報取得できる');
+        $this->assertEquals($name, $storeCoke->getName(), '商品の名前情報取得できる');
+        $this->assertEquals($price, $storeCoke->getPrice(), '商品の値段情報取得できる');
     }
 
 

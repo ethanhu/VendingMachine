@@ -1,11 +1,13 @@
 <?php
 
 require_once dirname(__FILE__) . '/Money.php';
+require_once dirname(__FILE__) . '/Money.php';
 
 class VendingMachine
 {
     private $money;
     private $insertMoneyBox = array();
+    private $itemBox = array();
 
     function __construct()
     {
@@ -49,6 +51,31 @@ class VendingMachine
         $changeMoney = $this->insertMoneyBox;
         return $this->_change($changeMoney);
     }
+
+    /**
+     * 商品格納する
+     */
+    public function addItem($item)
+    {
+        $name = $item->getName();
+        // 格納した商品再格納の場合、格納数字だけを増やす
+        if (array_key_exists($name, $this->itemBox)) {
+            $this->itemBox[$name]->store($item->getStockNum());
+        } else {
+            $this->itemBox[$name] = $item;
+        }
+    }
+
+    /**
+     * 商品取得する
+     */
+    public function getItem($name)
+    {
+        return $this->itemBox[$name];
+    }
+
+
+
 
     /**
      * 釣り銭を計算する
