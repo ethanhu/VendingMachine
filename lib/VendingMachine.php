@@ -5,40 +5,77 @@ require_once dirname(__FILE__) . '/Money.php';
 class VendingMachine
 {
     private $money;
-    private $moneyBox = array();
+    private $insertMoneyBox = array();
 
     function __construct()
     {
         $this->money = new Money();
     }
 
-    public function insert($moneyNum) 
+    /**
+     * お金投入
+     */
+    public function insert($moneyType) 
     {
-        if ($this->money->isValid($moneyNum)) {
-            array_push($this->moneyBox, $moneyNum); 
-        } else {
-            $this->refund($moneyNum);
+        if ($this->money->isValidVendingMachineMoneyType($moneyType)) {
+            array_push($this->insertMoneyBox, $moneyType); 
+            $this->total();
+            return true;
+        } 
+        // 想定外なお金は、投入金額加算せず、そのまま釣り銭としてを出力する
+        else {
+            $this->_changeOutput($moneyType);
+            return false;
         }
     } 
 
+    /**
+     * 投入お金総計
+     */
     public function total() 
     {
-        return array_sum($this->moneyBox);    
+        $total = array_sum($this->insertMoneyBox);
+        print "\n投入お金総計：$total \n";
+
+        return $total; 
     } 
 
-    public function refund($moneyNum = null) 
+    /**
+     * 払い戻し操作
+     */
+    public function refund() 
     {
-        print "\nお金払い戻し：\n";
-        if (!is_null($moneyNum)) {
-            print "refund $moneyNum \n";
-            return $moneyNum;
-        }
+        print "\n払い戻し操作： \n";
+        $changeMoney = $this->insertMoneyBox;
+        return $this->_change($changeMoney);
+    }
 
-        // refund all
-        $total = $this->total(); 
-        while($moneyNum = array_pop($this->moneyBox)) {
-            print "refund $moneyNum \n";
+    /**
+     * 釣り銭を計算する
+     */
+    private function _change()
+    {
+        $changeMoney = $this->insertMoneyBox;
+        $this->insertMoneyBox = array();
+        $this->_changeOutput($changeMoney);
+        return array_sum($changeMoney);
+    }
+
+    /**
+     * 釣り銭を出力する
+     */
+    private function _changeOutput($changeMoney) 
+    {
+        if (is_array($changeMoney)) {
+            print "\n釣り銭出力：\n";
+            while($moneyType = array_pop($changeMoney)) {
+                print "-釣り銭：$moneyType \n";
+            }
         }
-        return $total;
-    } 
+        # あつかえないお金を出力する
+        else {
+            print "扱えないお金出力：$changeMoney \n";
+        }
+    }
+
 }
