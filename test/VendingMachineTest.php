@@ -101,5 +101,61 @@ class VendingMachineTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($price, $storeCoke->getPrice(), '商品の値段情報取得できる');
     }
 
+    public function test_投入金額と在庫情報によって、コーラが購入できるかどうかを取得できる()
+    {
+        // 自動販売機初期化
+        $model = new VendingMachine();
+        $name = 'Coke';
+        $price = 120;
+        $stockNum = 5;
+        $coke = new Coke($name, $price);
+        $coke->store($stockNum);
+        $model->addItem($coke);
+
+        // 投入金50円
+        $money_50 = Money::M_50;
+        $model->insert($money_50);
+        $this->assertFalse($model->canPurchase($name), '投入50円が、120円のコーラを購入できず');
+
+        // 投入金100円
+        $money_100 = Money::M_100;
+        $model->insert($money_100);
+        $this->assertTrue($model->canPurchase($name), '投入150円が、120円のコーラを購入できる');
+
+        // 購入１本
+        $result1 = $model->purchase($name);
+        $this->assertTrue($result1, '投入150円が、120円のコーラ１本を購入した');
+        $this->assertEquals($price * 1, $model->getSaleAmount($name), 'コーラの売り上げ取得できる');
+        $this->assertFalse($model->canPurchase($name), '残り30円が、120円のコーラ2本を購入できず');
+
+        // 投入金1000円
+        $money_1000 = Money::M_1000;
+        $model->insert($money_1000);
+        $this->assertTrue($model->canPurchase($name), '投入1000円が、120円のコーラを購入できる');
+        
+        // 購入2本
+        $result2 = $model->purchase($name);
+        $this->assertTrue($result2, '投入1150円が、120円のコーラ2本を購入した');
+        $this->assertEquals($price * 2, $model->getSaleAmount($name), 'コーラの売り上げ取得できる');
+
+        // 購入3本
+        $result3 = $model->purchase($name);
+        $this->assertTrue($result3, '投入1150円が、120円のコーラ3本を購入した');
+        $this->assertEquals($price * 3, $model->getSaleAmount($name), 'コーラの売り上げ取得できる');
+ 
+        // 購入4本
+        $result4 = $model->purchase($name);
+        $this->assertTrue($result4, '投入1150円が、120円のコーラ4本を購入した');
+        $this->assertEquals($price * 4, $model->getSaleAmount($name), 'コーラの売り上げ取得できる');
+
+        // 購入5本
+        $result5 = $model->purchase($name);
+        $this->assertTrue($result5, '投入1150円が、120円のコーラ5本を購入した');
+        $this->assertEquals($price * 5, $model->getSaleAmount($name), 'コーラの売り上げ取得できる');
+
+        // 購入6本
+        $this->assertFalse($model->canPurchase($name), '投入1150円が、コーラ在庫が無いの場合、120円のコーラ６本を購入できず');
+        $this->assertEquals(550,  $model->refund(), '投入1150円が、コーラ5本を購入した後、釣り銭550円を取得できる');
+    }
 
 }
