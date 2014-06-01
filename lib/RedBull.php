@@ -2,10 +2,10 @@
 
 require_once dirname(__FILE__) . '/Item.php';
 
-class Coke extends Item
+class RedBull extends Item
 {
-    protected $name = 'Coke';
-    protected $price = 120;
+    protected $name = 'RedBull';
+    protected $price = 200;
 
     function __construct() 
     {

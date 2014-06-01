@@ -1,7 +1,6 @@
 <?php
 
 require_once dirname(__FILE__) . '/Money.php';
-require_once dirname(__FILE__) . '/Money.php';
 
 class VendingMachine
 {
@@ -23,7 +22,7 @@ class VendingMachine
     {
         if ($this->money->isValidVendingMachineMoneyType($moneyType)) {
             array_push($this->insertMoneyBox, $moneyType); 
-            print "$moneyType円を投入した、投入金額総計: " . $this->total() . "\n";
+            print "\n$moneyType 円を投入した、投入金額総計: " . $this->total() . "\n";
             return true;
         } 
         // 想定外なお金は、投入金額加算せず、そのまま釣り銭としてを出力する
@@ -91,6 +90,21 @@ class VendingMachine
     }
 
     /**
+     * 商品購入できるlist
+     */
+    public function getCanPurchaseList() 
+    {
+        $list = array();
+        foreach ($this->itemBox as $name => $item) {
+            if ($this->canPurchase($name)) {
+                array_push($list, $name);
+            }
+        }
+
+        return $list;
+    } 
+
+    /**
      * 商品購入できるチェク
      */
     public function canPurchase($name) 
@@ -100,10 +114,10 @@ class VendingMachine
         }
 
         if ($this->itemBox[$name]->canPurchase($this->total() - $this->purchaseAmount)) {
-            print "$name 購入できる";
+            print "$name 購入できる \n";
             return true;
         } else {
-            print "$name 購入できず";
+            print "$name 購入できず \n";
             return false;
         }
     } 
@@ -154,12 +168,12 @@ class VendingMachine
         if (is_array($changeMoney)) {
             print " - 釣り銭出力：\n";
             while($moneyType = array_pop($changeMoney)) {
-                print "  -- 釣り銭：$moneyType \n";
+                print "  -- 釣り銭: $moneyType \n";
             }
         }
         # あつかえないお金もしくは購入した釣り銭を出力する
         else {
-            print "  -- 釣り銭：$changeMoney \n";
+            print "  -- 釣り銭: $changeMoney \n";
         }
     }
 

@@ -3,6 +3,8 @@
 require_once dirname(__FILE__) . '/../lib/VendingMachine.php';
 require_once dirname(__FILE__) . '/../lib/Money.php';
 require_once dirname(__FILE__) . '/../lib/Coke.php';
+require_once dirname(__FILE__) . '/../lib/RedBull.php';
+require_once dirname(__FILE__) . '/../lib/Water.php';
 
 class VendingMachineTest extends PHPUnit_Framework_TestCase
 {
@@ -90,7 +92,7 @@ class VendingMachineTest extends PHPUnit_Framework_TestCase
         $name = 'Coke';
         $price = 120;
         $stockNum = 5;
-        $coke = new Coke($name, $price);
+        $coke = new Coke();
         $coke->store($stockNum);
         $this->model->addItem($coke);
         $storeCoke = $this->model->getItem($name);
@@ -108,7 +110,7 @@ class VendingMachineTest extends PHPUnit_Framework_TestCase
         $name = 'Coke';
         $price = 120;
         $stockNum = 5;
-        $coke = new Coke($name, $price);
+        $coke = new Coke();
         $coke->store($stockNum);
         $model->addItem($coke);
 
@@ -158,4 +160,49 @@ class VendingMachineTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(550,  $model->refund(), '投入1150円が、コーラ5本を購入した後、釣り銭550円を取得できる');
     }
 
-}
+    public function test_投入金額によって、購入できる商品リストを取得できる()
+    {
+        // 自動販売機初期化
+        $model = new VendingMachine();
+
+        // 在庫数 
+        $stockNum = 5;
+
+        // Coke
+        $coke = new Coke();
+        $coke->store($stockNum);
+        $model->addItem($coke);
+
+        // RedBull
+        $redBull = new RedBull();
+        $redBull->store($stockNum);
+        $model->addItem($redBull);
+
+        // Coke
+        $water = new Water();
+        $water->store($stockNum);
+        $model->addItem($water);
+    
+        
+        // 投入金50円
+        $money_50 = Money::M_50;
+        $model->insert($money_50);
+        $this->assertEquals(array(), $model->getCanPurchaseList(), '投入50円が、全商品を購入できず');
+
+        // もう１回投入金50円
+        $money_50 = Money::M_50;
+        $model->insert($money_50);
+        $this->assertEquals(array($water->getName()), $model->getCanPurchaseList(), '投入100円が、Waterを購入できる');
+
+        // もう１回投入金50円
+        $money_50 = Money::M_50;
+        $model->insert($money_50);
+        $this->assertEquals(array($coke->getName(), $water->getName()), $model->getCanPurchaseList(), '投入150円が、WaterとCokeを購入できる');
+
+        // もう１回投入金50円
+        $money_50 = Money::M_50;
+        $model->insert($money_50);
+        $this->assertEquals(array($coke->getName(), $redBull->getName(), $water->getName()), $model->getCanPurchaseList(), '投入200円が、WaterとCokeとRedBullを購入できる');
+    }
+
+}    
