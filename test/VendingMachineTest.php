@@ -205,4 +205,58 @@ class VendingMachineTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(array($coke->getName(), $redBull->getName(), $water->getName()), $model->getCanPurchaseList(), '投入200円が、WaterとCokeとRedBullを購入できる');
     }
 
+    public function test_お金投入して、購入した後、釣り銭を取得できる()
+    {
+        // 自動販売機初期化
+        $model = new VendingMachine();
+
+        // 在庫数 
+        $stockNum = 5;
+
+        // Coke
+        $coke = new Coke();
+        $coke->store($stockNum);
+        $model->addItem($coke);
+
+        // RedBull
+        $redBull = new RedBull();
+        $redBull->store($stockNum);
+        $model->addItem($redBull);
+
+        // Coke
+        $water = new Water();
+        $water->store($stockNum);
+        $model->addItem($water);
+    
+        // 投入金50円
+        $money_100 = Money::M_100;
+        $model->insert($money_100);
+
+        // 購入できるチェク
+        $this->assertTrue($model->canPurchase($water->getName()), '投入100円が、Waterを購入できる');
+
+        // 購入
+        $model->purchase($water->getName());
+
+        // 釣り銭
+        $this->assertEquals(0, $model->refund(), "投入100円、100のWaterを購入して、釣り銭0円を出力する");
+
+        
+        // 投入金500円
+        $money_500 = Money::M_500;
+        $model->insert($money_500);
+
+        // 購入できるチェク
+        $this->assertTrue($model->canPurchase($water->getName()), '投入500円が、100円Waterを購入できる');
+        $this->assertTrue($model->canPurchase($coke->getName()),  '投入500円が、120円Cokeを購入できる');
+        $this->assertTrue($model->canPurchase($redBull->getName()), '投入500円が、200円RedBullを購入できる');
+
+        // 購入
+        $model->purchase($water->getName());
+        $model->purchase($coke->getName());
+        $model->purchase($redBull->getName());
+
+        // 釣り銭
+        $this->assertEquals(80, $model->refund(), "投入500円、100円Waterと120円Cokeと200円RedBullを購入して、釣り銭80円を出力する");
+    }
 }    
